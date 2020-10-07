@@ -1,0 +1,1 @@
+# Datastore for energy readings
