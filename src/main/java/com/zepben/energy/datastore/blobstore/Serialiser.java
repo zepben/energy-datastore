@@ -27,14 +27,14 @@ public interface Serialiser<T> {
     byte[] sx(T item);
 
     /**
-     * Should return the offset into the byte array returned by the last call to {@link Serialiser#sx(T)}
+     * Should return the offset into the byte array returned by the last call to {@link #sx}
      *
      * @return the offset into the byte array returned by the last serialisation.
      */
     int sxOffset();
 
     /**
-     * Should return the length of the bytes for the last call to {@link Serialiser#sx(T)}
+     * Should return the length of the bytes for the last call to {@link #sx}
      *
      * @return the length of the bytes of the last serialisation.
      */
