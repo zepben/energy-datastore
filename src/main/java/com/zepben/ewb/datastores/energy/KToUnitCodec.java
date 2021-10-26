@@ -15,8 +15,7 @@ class KToUnitCodec {
 
     static long kToUnit(double v) {
         if (Double.isNaN(v))
-            return Long.MIN_VALUE/2;
-//            throw new IllegalArgumentException("NaN values are not supported");
+            return Integer.MIN_VALUE;
 
         if (v == 0)
             return 0;
@@ -25,7 +24,7 @@ class KToUnitCodec {
     }
 
     static double unitToK(long v) {
-        if (v == Long.MIN_VALUE/2)
+        if (v == Integer.MIN_VALUE)
             return Double.NaN;
 
         return v / 1000.;

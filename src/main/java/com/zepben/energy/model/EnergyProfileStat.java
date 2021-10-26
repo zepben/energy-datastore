@@ -37,7 +37,7 @@ public class EnergyProfileStat {
 
     @SuppressWarnings("WeakerAccess")
     public static EnergyProfileStat ofAvg(EnergyProfile profile) {
-        return accumulating(profile, (l, r) -> l + r, (l, v) -> v / l, 0, 0, 0);
+        return accumulating(profile, Double::sum, (l, v) -> v / l, 0, 0, 0);
     }
 
     public double kwIn() {
@@ -72,35 +72,16 @@ public class EnergyProfileStat {
         double kwIn = initKwIn;
         double kwOut = initKwOut;
         double kwNet = initKwNet;
-
-        int inLen = len;
-        int outLen = len;
-        int netLen = len;
-
         for (int i = 0; i < len; ++i) {
-
-            double kwInVal = profile.kwIn().get(i);
-            double kwOutVal = profile.kwOut().get(i);
-
-            if (Double.isNaN(kwInVal) || Double.isNaN(kwOutVal)) netLen =- 1;
-            if (Double.isNaN(kwInVal)) {
-                inLen =- 1;
-                kwInVal = 0;
-            }
-            if (Double.isNaN(kwOutVal)) {
-                outLen =- 1;
-                kwOutVal = 0;
-            }
-
-            kwIn = accumulator.applyAsDouble(kwIn, kwInVal);
-            kwOut = accumulator.applyAsDouble(kwOut, kwOutVal);
-            kwNet = accumulator.applyAsDouble(kwNet, kwInVal - kwOutVal);
+            kwIn = accumulator.applyAsDouble(kwIn, profile.kwIn().get(i));
+            kwOut = accumulator.applyAsDouble(kwOut, profile.kwOut().get(i));
+            kwNet = accumulator.applyAsDouble(kwNet, profile.kwIn().get(i) - profile.kwOut().get(i));
         }
 
         return new EnergyProfileStat(
-            finalizer.finalize(inLen, kwIn),
-            finalizer.finalize(outLen, kwOut),
-            finalizer.finalize(netLen, kwNet));
+            finalizer.finalize(len, kwIn),
+            finalizer.finalize(len, kwOut),
+            finalizer.finalize(len, kwNet));
     }
 
 }

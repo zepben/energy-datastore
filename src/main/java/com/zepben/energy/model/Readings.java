@@ -78,7 +78,7 @@ public abstract class Readings implements DoubleArrayView {
     @Override
     public double get(int i) {
         if (numChannels() == 1)
-            return channel(1).get(i) ;
+            return channel(1).get(i);
         else {
             double value = channel(1).get(i);
             for (int idx = 2, len = numChannels(); idx <= len; ++idx) {
