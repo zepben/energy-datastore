@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 
 public class DoubleArrayViewTest {
 
-    private class MockDoubleArrayView implements DoubleArrayView {
+    private static class MockDoubleArrayView implements DoubleArrayView {
 
         private final double[] values;
 
@@ -36,7 +36,7 @@ public class DoubleArrayViewTest {
 
     }
 
-    private DoubleArrayView array = new MockDoubleArrayView(4., -1, 10, 6);
+    private final DoubleArrayView array = new MockDoubleArrayView(4., -1, 10, 6);
 
     @Test
     public void max() {

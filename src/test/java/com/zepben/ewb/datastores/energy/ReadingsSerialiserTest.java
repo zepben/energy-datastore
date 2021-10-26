@@ -60,14 +60,14 @@ public class ReadingsSerialiserTest {
         assertThat(dsxReadings, hasEqualChannels(readings));
     }
 
-    @Test
-    public void doesNotSupportNaN() {
-        Readings readings = Readings.of(Channel.of(Double.NaN));
-        ReadingsSerialiser sx = new ReadingsSerialiser();
-        expect(() -> sx.sx(readings))
-            .toThrow(IllegalArgumentException.class)
-            .withMessage("NaN values are not supported");
-    }
+//    @Test
+//    public void doesNotSupportNaN() {
+//        Readings readings = Readings.of(Channel.of(Double.NaN));
+//        ReadingsSerialiser sx = new ReadingsSerialiser();
+//        expect(() -> sx.sx(readings))
+//            .toThrow(IllegalArgumentException.class)
+//            .withMessage("NaN values are not supported");
+//    }
 
     @Test
     public void maxChannelsIs127() {
@@ -118,11 +118,11 @@ public class ReadingsSerialiserTest {
         assertThat(dsxReadings, sameInstance(ZeroedReadingsCache.of(numChannels, readingsLength)));
     }
 
-    @Test
-    public void serialiseNotANumberThrows() {
-        ReadingsSerialiser sx = new ReadingsSerialiser();
-        expect(() -> sx.sx(Readings.of(Channel.of(Double.NaN)))).toThrow(IllegalArgumentException.class);
-    }
+//    @Test
+//    public void serialiseNotANumberThrows() {
+//        ReadingsSerialiser sx = new ReadingsSerialiser();
+//        expect(() -> sx.sx(Readings.of(Channel.of(Double.NaN)))).toThrow(IllegalArgumentException.class);
+//    }
 
     @Test
     public void deserialiseTooShortBufferReturnsNull() {

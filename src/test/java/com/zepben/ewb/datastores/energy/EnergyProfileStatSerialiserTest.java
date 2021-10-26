@@ -52,29 +52,29 @@ public class EnergyProfileStatSerialiserTest {
         assertThat(dsxStat.kwNet(), equalTo(stat.kwNet()));
     }
 
-    @Test
-    public void doesNotSupportNaN() {
-        {
-            EnergyProfileStat stat = new EnergyProfileStat(Double.NaN, 1, 1);
-            expect(() -> sx.sx(stat))
-                .toThrow(IllegalArgumentException.class)
-                .withMessage("NaN values are not supported");
-        }
-
-        {
-            EnergyProfileStat stat = new EnergyProfileStat(1, Double.NaN, 1);
-            expect(() -> sx.sx(stat))
-                .toThrow(IllegalArgumentException.class)
-                .withMessage("NaN values are not supported");
-        }
-
-        {
-            EnergyProfileStat stat = new EnergyProfileStat(1, 1, Double.NaN);
-            expect(() -> sx.sx(stat))
-                .toThrow(IllegalArgumentException.class)
-                .withMessage("NaN values are not supported");
-        }
-    }
+//    @Test
+//    public void doesNotSupportNaN() {
+//        {
+//            EnergyProfileStat stat = new EnergyProfileStat(Double.NaN, 1, 1);
+//            expect(() -> sx.sx(stat))
+//                .toThrow(IllegalArgumentException.class)
+//                .withMessage("NaN values are not supported");
+//        }
+//
+//        {
+//            EnergyProfileStat stat = new EnergyProfileStat(1, Double.NaN, 1);
+//            expect(() -> sx.sx(stat))
+//                .toThrow(IllegalArgumentException.class)
+//                .withMessage("NaN values are not supported");
+//        }
+//
+//        {
+//            EnergyProfileStat stat = new EnergyProfileStat(1, 1, Double.NaN);
+//            expect(() -> sx.sx(stat))
+//                .toThrow(IllegalArgumentException.class)
+//                .withMessage("NaN values are not supported");
+//        }
+//    }
 
     @Test
     public void deserialiseTooShortBufferReturnsNull() {
