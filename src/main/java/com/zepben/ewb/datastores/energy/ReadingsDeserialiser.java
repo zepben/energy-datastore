@@ -29,9 +29,6 @@ import java.nio.ByteBuffer;
 class ReadingsDeserialiser implements Deserialiser<Readings> {
 
     private final ChannelFactory channelFactory;
-    private ByteBuffer buffer = ByteBuffer.allocate(0);
-    private double[] values = new double[48];
-    private Channel[] channels = new Channel[1];
 
     ReadingsDeserialiser(ChannelFactory channelFactory) {
         this.channelFactory = channelFactory;
@@ -40,13 +37,14 @@ class ReadingsDeserialiser implements Deserialiser<Readings> {
     @Override
     @Nullable
     public Readings dsx(byte[] bytes, int offset, int length) {
+        ByteBuffer buffer = ByteBuffer.allocate(length);
+        Channel[] channels = new Channel[1];
+        double[] values = new double[48];
+
         try {
-            checkOrGrowBuffer(length);
-            buffer.clear();
             buffer.put(bytes, offset, length);
             buffer.flip();
 
-            // Get the number of channels
             int nChannels = buffer.get();
             if (nChannels <= 0) {
                 return null;
@@ -60,7 +58,7 @@ class ReadingsDeserialiser implements Deserialiser<Readings> {
                 values = new double[nIntervals];
             }
 
-            boolean allZeroed = createChannels(buffer, channels, values);
+            boolean allZeroed = createChannels(buffer.asReadOnlyBuffer(), channels, values);
 
             if (allZeroed)
                 return ZeroedReadingsCache.of(channels.length, channels[0].length());
@@ -101,10 +99,4 @@ class ReadingsDeserialiser implements Deserialiser<Readings> {
 
         return allZeroed;
     }
-
-    private void checkOrGrowBuffer(int newSize) {
-        if (newSize > buffer.capacity())
-            buffer = ByteBuffer.allocate(newSize);
-    }
-
 }

@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides the blob stores to be used by the EWB energy profile reader/writer instances.
@@ -29,7 +30,7 @@ import java.util.Map;
 class ByDateBlobStoreCache implements ByDateBlobWriterProvider, ByDateBlobReaderProvider {
 
     private final ByDateBlobStoreProvider factory;
-    private Map<LocalDate, BlobStore> cache = new HashMap<>();
+    private Map<LocalDate, BlobStore> cache = new ConcurrentHashMap<>();
 
     @EverythingIsNonnullByDefault
     interface ErrorHandler {
@@ -69,7 +70,7 @@ class ByDateBlobStoreCache implements ByDateBlobWriterProvider, ByDateBlobReader
     }
 
     void close(ErrorHandler handler) {
-        Map<LocalDate, BlobStore> failed = new HashMap<>();
+        Map<LocalDate, BlobStore> failed = new ConcurrentHashMap<>();
         cache.forEach((date, store) -> {
             try {
                 store.close();

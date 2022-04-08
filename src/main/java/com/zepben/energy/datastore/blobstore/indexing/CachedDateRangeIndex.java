@@ -22,6 +22,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
     private final DateRangeIndex index;
     private final Map<String, IdDateRange> cache = new HashMap<>();
 
+
     public CachedDateRangeIndex(DateRangeIndex backingIndex) {
         this.index = backingIndex;
     }
@@ -29,12 +30,23 @@ public class CachedDateRangeIndex implements DateRangeIndex {
     @Nullable
     @Override
     public IdDateRange get(String id) {
+        // Ignore on empty id
+        if (id.isEmpty()) return null;
+
+        // Differentiate between "not in cache" and "null"; if null no need to fetch from DB
         IdDateRange range = cache.get(id);
-        if (range != null)
+        if (range != null) {
+            if (range.equals(badRange(id))) {
+                return null;
+            }
             return range;
+        }
+
 
         range = index.get(id);
-        cache.put(id, range);
+
+        // Put range into cache if not null, otherwise put badRange(id)
+        cache.put(id, range != null ? range : badRange(id));
         return range;
     }
 
@@ -92,6 +104,10 @@ public class CachedDateRangeIndex implements DateRangeIndex {
         // We don't track what's changed, so we need to clear the whole cache
         cache.clear();
         return index.rollback();
+    }
+
+    private IdDateRange badRange(String id) {
+        return new IdDateRange(id, LocalDate.now().minusYears(10), LocalDate.now().minusYears(10));
     }
 
 }
