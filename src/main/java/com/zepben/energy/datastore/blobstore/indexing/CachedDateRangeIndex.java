@@ -14,13 +14,17 @@ import com.zepben.energy.model.IdDateRange;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 @EverythingIsNonnullByDefault
 public class CachedDateRangeIndex implements DateRangeIndex {
 
     private final DateRangeIndex index;
-    private final Map<String, IdDateRange> cache = new HashMap<>();
+    private final Map<String, IdDateRange> cache = new ConcurrentHashMap<>();
+    private final Set<String> cachedEmptyIds = new ConcurrentSkipListSet<>();
+
 
 
     public CachedDateRangeIndex(DateRangeIndex backingIndex) {
@@ -33,20 +37,23 @@ public class CachedDateRangeIndex implements DateRangeIndex {
         // Ignore on empty id
         if (id.isEmpty()) return null;
 
-        // Differentiate between "not in cache" and "null"; if null no need to fetch from DB
+        // If it's been fetched before but is not in the DB
+        if (cachedEmptyIds.contains(id)) return null;
+
         IdDateRange range = cache.get(id);
         if (range != null) {
-            if (range.equals(badRange(id))) {
-                return null;
-            }
             return range;
         }
 
-
         range = index.get(id);
 
-        // Put range into cache if not null, otherwise put badRange(id)
-        cache.put(id, range != null ? range : badRange(id));
+        // if range is null, store it in cachedEmptyIDs, otherwise in proper cache
+        if (range == null) {
+            cachedEmptyIds.add(id);
+        } else {
+            cache.put(id, range);
+        }
+
         return range;
     }
 
@@ -85,6 +92,9 @@ public class CachedDateRangeIndex implements DateRangeIndex {
             return true;
 
         cache.put(id, newDateRange);
+        // if we have a new range, and we previously cached empty,
+        // clear it from the list
+        cachedEmptyIds.remove(id);
         return index.save(id, from, to);
     }
 
