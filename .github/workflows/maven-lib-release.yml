@@ -75,7 +75,7 @@ jobs:
         shell: bash
 
   create-release:
-    needs: [build-artifact]
+    needs: deploy-central
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic:5.5.0
     steps:
