@@ -18,10 +18,10 @@ import java.time.LocalDate;
 @EverythingIsNonnullByDefault
 class IdDateRangeCodec {
 
-    private final ByteBuffer buffer = ByteBuffer.allocate(12);
 
     @Nullable
     IdDateRange deserialise(String id, @Nullable byte[] bytes) {
+        final ByteBuffer buffer = ByteBuffer.allocate(12);
         if (bytes == null || bytes.length < buffer.capacity())
             return null;
 
@@ -35,6 +35,7 @@ class IdDateRangeCodec {
     }
 
     byte[] serialise(LocalDate from, LocalDate to) {
+        final ByteBuffer buffer = ByteBuffer.allocate(12);
         buffer.clear();
         buffer.putInt(from.getYear())
             .put((byte) from.getMonthValue())
