@@ -144,5 +144,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Update to next minor version
         run: |
-          /scripts/update-version.sh --java --maven --release pom.xml changelog.md
+          /scripts/update-version.sh --java --maven --release pom.xml docs/release.md
         shell: bash
