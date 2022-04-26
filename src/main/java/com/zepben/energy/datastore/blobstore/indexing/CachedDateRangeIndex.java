@@ -22,7 +22,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
 
     private final DateRangeIndex index;
     private final Map<String, IdDateRange> cache = new ConcurrentHashMap<>();
-    private final Map<String, Integer> cachedEmptyIds = new ConcurrentHashMap<>();
+    private final Set<String> cachedEmptyIds = ConcurrentHashMap.newKeySet();
 
 
 
@@ -37,7 +37,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
         if (id.isEmpty()) return null;
 
         // If it's been fetched before but is not in the DB
-        if (cachedEmptyIds.containsKey(id)) return null;
+        if (cachedEmptyIds.contains(id)) return null;
 
         IdDateRange range = cache.get(id);
         if (range != null) {
@@ -48,7 +48,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
 
         // if range is null, store it in cachedEmptyIDs, otherwise in proper cache
         if (range == null) {
-            cachedEmptyIds.put(id, 1);
+            cachedEmptyIds.add(id);
         } else {
             cache.put(id, range);
         }
