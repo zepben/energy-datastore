@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 @EverythingIsNonnullByDefault
@@ -23,7 +22,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
 
     private final DateRangeIndex index;
     private final Map<String, IdDateRange> cache = new ConcurrentHashMap<>();
-    private final Set<String> cachedEmptyIds = new ConcurrentSkipListSet<>();
+    private final Map<String, Integer> cachedEmptyIds = new ConcurrentHashMap<>();
 
 
 
@@ -38,7 +37,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
         if (id.isEmpty()) return null;
 
         // If it's been fetched before but is not in the DB
-        if (cachedEmptyIds.contains(id)) return null;
+        if (cachedEmptyIds.containsKey(id)) return null;
 
         IdDateRange range = cache.get(id);
         if (range != null) {
@@ -49,7 +48,7 @@ public class CachedDateRangeIndex implements DateRangeIndex {
 
         // if range is null, store it in cachedEmptyIDs, otherwise in proper cache
         if (range == null) {
-            cachedEmptyIds.add(id);
+            cachedEmptyIds.put(id, 1);
         } else {
             cache.put(id, range);
         }
