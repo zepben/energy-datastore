@@ -25,7 +25,6 @@ class IdDateRangeCodec {
         if (bytes == null || bytes.length < buffer.capacity())
             return null;
 
-        buffer.clear();
         buffer.put(bytes);
         buffer.flip();
 
@@ -36,7 +35,6 @@ class IdDateRangeCodec {
 
     byte[] serialise(LocalDate from, LocalDate to) {
         final ByteBuffer buffer = ByteBuffer.allocate(12);
-        buffer.clear();
         buffer.putInt(from.getYear())
             .put((byte) from.getMonthValue())
             .put((byte) from.getDayOfMonth())
