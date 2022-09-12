@@ -1,6 +1,6 @@
 # Energy Datastore changelog
 
-## v1.4.0 - UNRELEASED
+## [1.4.0] - UNRELEASED
 
 ### Breaking Changes
 * None.
@@ -17,11 +17,11 @@
 ### Notes
 * None.
 
-## v1.3.0
+## [1.3.0]
 
 Update energy datastore to support multithreaded clients
 and make it thread safe.
 
-## v1.2.0
+## [1.2.0]
 
 Initial open source release of energy datastore
