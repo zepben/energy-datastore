@@ -14,6 +14,7 @@ import com.zepben.blobstore.BlobStore;
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.BlobWriter;
 import com.zepben.energy.model.IdDateRange;
+import kotlin.Unit;
 
 import javax.annotation.Nullable;
 import java.time.LocalDate;
@@ -32,8 +33,8 @@ public class BlobDateRangeIndex implements DateRangeIndex, AutoCloseable {
 
     public BlobDateRangeIndex(BlobStore blobStore) {
         this.blobStore = blobStore;
-        reader = blobStore.reader();
-        writer = blobStore.writer();
+        reader = blobStore.getReader();
+        writer = blobStore.getWriter();
     }
 
     @Override
@@ -59,6 +60,7 @@ public class BlobDateRangeIndex implements DateRangeIndex, AutoCloseable {
                 IdDateRange dateRange = codec.deserialise(id, blob);
                 if (dateRange != null)
                     handler.accept(dateRange);
+                return Unit.INSTANCE;
             });
         } catch (BlobStoreException e) {
             // TODO: What to do with this exception?
@@ -72,6 +74,7 @@ public class BlobDateRangeIndex implements DateRangeIndex, AutoCloseable {
                 IdDateRange dateRange = codec.deserialise(id, blob);
                 if (dateRange != null)
                     handler.accept(dateRange);
+                return Unit.INSTANCE;
             });
         } catch (BlobStoreException e) {
             // TODO: What to do with this exception?
@@ -82,7 +85,7 @@ public class BlobDateRangeIndex implements DateRangeIndex, AutoCloseable {
     public boolean save(String id, LocalDate from, LocalDate to) {
         byte[] bytes = codec.serialise(from, to);
         try {
-            return writer.update(id, STORE_TAG, bytes) || writer.write(id, STORE_TAG, bytes);
+            return writer.update(id, STORE_TAG, bytes, 0, bytes.length) || writer.write(id, STORE_TAG, bytes, 0, bytes.length);
         } catch (BlobStoreException e) {
             // TODO: What to do with this exception?
             return false;

@@ -16,7 +16,7 @@ public enum EwbChannelFactory implements ChannelFactory {
     FLOAT_VALUES(Channel::ofFloats),
     DOUBLE_VALUES(Channel::of);
 
-    private ChannelFactory factory;
+    private final ChannelFactory factory;
 
     EwbChannelFactory(ChannelFactory factory) {
         this.factory = factory;

@@ -47,12 +47,12 @@ public class ByDateBlobEnergyProfileReader implements EnergyProfileReader {
     private final Deserialisers dsx;
 
     private final ByDateItemDeserialiser<EnergyProfile> itemDeserialiser = this::deserialiseItem;
-    private final Map<String, ByDateTagDeserialiser> tagDeserialisers = Arrays.stream(EnergyProfileAttribute.values())
+    private final Map<String, ByDateTagDeserialiser<?>> tagDeserialisers = Arrays.stream(EnergyProfileAttribute.values())
         .collect(toMap(EnergyProfileAttribute::storeString, this::tagDeserialiser));
 
     // NOTE: Hard coding this byte here breaks the generic serialisation / deserialisation offered by the Deserialisers class.
     //       Need to think about how to deal with the issue later.
-    final WhereBlob cacheableWhere = WhereBlob.equals(EnergyProfileAttribute.CACHEABLE.storeString(), new byte[]{1});
+    final WhereBlob cacheableWhere = WhereBlob.Companion.equals(EnergyProfileAttribute.CACHEABLE.storeString(), new byte[]{1});
 
     public ByDateBlobEnergyProfileReader(DateRangeIndex dateRangeIndex,
                                          ByDateItemReader<EnergyProfile> itemReader,
@@ -74,13 +74,13 @@ public class ByDateBlobEnergyProfileReader implements EnergyProfileReader {
             EnergyProfileStat::ofMax);
     }
 
-    // Package private for easier testing. A bit clunky but I just don't have time right now... GMC
+    // Package private for easier testing. A bit clunky, but I just don't have time right now... GMC
     ByDateItemDeserialiser<EnergyProfile> itemDeserialiser() {
         return itemDeserialiser;
     }
 
-    // Package private for easier testing. A bit clunky but I just don't have time right now... GMC
-    Map<String, ByDateTagDeserialiser> tagDeserialisers() {
+    // Package private for easier testing. A bit clunky, but I just don't have time right now... GMC
+    Map<String, ByDateTagDeserialiser<?>> tagDeserialisers() {
         return Collections.unmodifiableMap(tagDeserialisers);
     }
 
@@ -158,7 +158,7 @@ public class ByDateBlobEnergyProfileReader implements EnergyProfileReader {
         return maximumsReader;
     }
 
-    private ByDateTagDeserialiser tagDeserialiser(EnergyProfileAttribute attr) {
+    private ByDateTagDeserialiser<?> tagDeserialiser(EnergyProfileAttribute attr) {
         switch (attr) {
             case KW_IN:
                 return (id, date, tag, blob) -> dsx.kwInDsx().dsx(blob);
@@ -192,7 +192,7 @@ public class ByDateBlobEnergyProfileReader implements EnergyProfileReader {
 
         Readings readings = dsx.dsx(bytes);
         if (readings == null) {
-            throw new DeserialiseException("failed to deserialise readings: " + tag.storeString());
+            throw new DeserialiseException("failed to deserialise readings: " + tag.storeString(), null);
         }
 
         return readings;
@@ -204,7 +204,7 @@ public class ByDateBlobEnergyProfileReader implements EnergyProfileReader {
             return false;
 
         Boolean result = dsx.cacheableDsx().dsx(bytes);
-        return result == null ? false : result;
+        return result != null && result;
     }
 
 }

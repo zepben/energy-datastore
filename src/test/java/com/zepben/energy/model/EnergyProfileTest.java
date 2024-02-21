@@ -12,6 +12,7 @@ package com.zepben.energy.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static com.zepben.testutils.exception.ExpectException.expect;
 import static org.hamcrest.CoreMatchers.is;
@@ -24,7 +25,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class EnergyProfileTest {
 
     private EnergyProfile newProfile(Readings in, Readings out) {
-        return EnergyProfile.of("mock", LocalDate.now(), in, out);
+        return EnergyProfile.of("mock", LocalDate.now(ZoneId.systemDefault()), in, out);
     }
 
     private Readings newReadings(double... values) {
@@ -35,9 +36,9 @@ public class EnergyProfileTest {
     public void createNonCacheableProfile() {
         Readings r1 = Readings.of(Channel.of(1));
         Readings r2 = Readings.of(Channel.of(2));
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), r1, r2);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), r1, r2);
         assertThat(profile.id(), is("id"));
-        assertThat(profile.date(), is(LocalDate.now()));
+        assertThat(profile.date(), is(LocalDate.now(ZoneId.systemDefault())));
         assertThat(profile.kwIn(), is(r1));
         assertThat(profile.kwOut(), is(r2));
         assertThat(profile.cacheable(), is(false));
@@ -47,10 +48,10 @@ public class EnergyProfileTest {
     public void createCacheableProfile() {
         Readings r1 = Readings.of(Channel.of(1));
         Readings r2 = Readings.of(Channel.of(2));
-        EnergyProfile profile = EnergyProfile.ofCacheable("id", LocalDate.now(), r1, r2);
+        EnergyProfile profile = EnergyProfile.ofCacheable("id", LocalDate.now(ZoneId.systemDefault()), r1, r2);
 
         assertThat(profile.id(), is("id"));
-        assertThat(profile.date(), is(LocalDate.now()));
+        assertThat(profile.date(), is(LocalDate.now(ZoneId.systemDefault())));
         assertThat(profile.kwIn(), is(r1));
         assertThat(profile.kwOut(), is(r2));
         assertThat(profile.cacheable(), is(true));
@@ -58,7 +59,7 @@ public class EnergyProfileTest {
 
     @Test
     public void usesEmptyReadingsWhenNull() {
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), null, null, true);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), null, null, true);
         assertThat(profile.kwIn(), sameInstance(Readings.EMPTY_READINGS));
         assertThat(profile.kwOut(), sameInstance(Readings.EMPTY_READINGS));
     }
@@ -66,14 +67,14 @@ public class EnergyProfileTest {
     @Test
     public void nullKwInUsesMissingCache() {
         Readings kwOut = Readings.of(Channel.of(1, 4));
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), null, kwOut);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), null, kwOut);
         assertThat(profile.kwIn(), sameInstance(ZeroedReadingsCache.ofMissing(kwOut.length())));
     }
 
     @Test
     public void nullKwOutUsesMissingCache() {
         Readings kwIn = Readings.of(Channel.of(1, 4));
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), kwIn, null);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), kwIn, null);
         assertThat(profile.kwOut(), sameInstance(ZeroedReadingsCache.ofMissing(kwIn.length())));
     }
 
@@ -81,7 +82,7 @@ public class EnergyProfileTest {
     public void kwNet() {
         Readings kwIn = Readings.of(Channel.of(2, 2));
         Readings kwOut = Readings.of(Channel.of(1, 4));
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), kwIn, kwOut);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), kwIn, kwOut);
         assertThat(profile.kwNet().length(), is(2));
         assertThat(profile.kwNet().get(0), is(1.0));
         assertThat(profile.kwNet().get(1), is(-2.0));
@@ -89,18 +90,17 @@ public class EnergyProfileTest {
 
     @Test
     public void KwNetUsesCachedValueWithZeroLenReadings() {
-        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(), Readings.EMPTY_READINGS, Readings.EMPTY_READINGS);
+        EnergyProfile profile = EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), Readings.EMPTY_READINGS, Readings.EMPTY_READINGS);
         assertThat(profile.kwNet(), sameInstance(Readings.EMPTY_READINGS));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void notEqualReadingsLength() {
         Readings kwIn = Readings.of(Channel.of(1, 1));
         Readings kwOut = Readings.of(Channel.of(1));
-        expect(() -> {
-            EnergyProfile.of("id", LocalDate.now(), kwIn, kwOut);
-        }).toThrow(IllegalArgumentException.class);
+
+        expect(() -> EnergyProfile.of("id", LocalDate.now(ZoneId.systemDefault()), kwIn, kwOut))
+            .toThrow(IllegalArgumentException.class);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class EnergyProfileTest {
     }
 
     @Test
-    public void toStringContainsMembers() throws Exception {
+    public void toStringContainsMembers() {
         Readings kwIn = newReadings(1.1);
         Readings kwOut = newReadings(2.2);
         EnergyProfile profile = newProfile(kwIn, kwOut);

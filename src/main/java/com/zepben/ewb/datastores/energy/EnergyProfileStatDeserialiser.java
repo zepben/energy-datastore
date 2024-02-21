@@ -24,7 +24,7 @@ public class EnergyProfileStatDeserialiser implements Deserialiser<EnergyProfile
     private static final int NUM_STAT_VALUES = 3;
 
     // Buffer has length of the number of stat values times the maximum 7 bit encoded long
-    private ByteBuffer buffer = ByteBuffer.allocate(NUM_STAT_VALUES * 9);
+    private final ByteBuffer buffer = ByteBuffer.allocate(NUM_STAT_VALUES * 9);
 
     @Nullable
     @Override
@@ -36,9 +36,9 @@ public class EnergyProfileStatDeserialiser implements Deserialiser<EnergyProfile
             buffer.put(bytes, offset, length);
             buffer.flip();
 
-            double kwIn = KToUnitCodec.unitToK(BytesUtil.decode7BitLong(buffer));
-            double kwOut = KToUnitCodec.unitToK(BytesUtil.decode7BitLong(buffer));
-            double kwNet = KToUnitCodec.unitToK(BytesUtil.decode7BitLong(buffer));
+            double kwIn = KToUnitCodec.unitToK(BytesUtil.INSTANCE.decode7BitLong(buffer));
+            double kwOut = KToUnitCodec.unitToK(BytesUtil.INSTANCE.decode7BitLong(buffer));
+            double kwNet = KToUnitCodec.unitToK(BytesUtil.INSTANCE.decode7BitLong(buffer));
 
             return new EnergyProfileStat(kwIn, kwOut, kwNet);// Need to remove id and date from profile stat class
         } catch (BufferUnderflowException | BufferOverflowException | IndexOutOfBoundsException e) {

@@ -21,15 +21,15 @@ public class EnergyProfileStatSerialiser implements Serialiser<EnergyProfileStat
     private static final int NUM_STAT_VALUES = 3;
 
     // Buffer has length of the number of stat values times the maximum 7 bit encoded long
-    private ByteBuffer buffer = ByteBuffer.allocate(NUM_STAT_VALUES * 9);
+    private final ByteBuffer buffer = ByteBuffer.allocate(NUM_STAT_VALUES * 9);
 
     @Override
     public byte[] sx(EnergyProfileStat stat) {
         buffer.clear();
 
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwIn()));
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwOut()));
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwNet()));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwIn()));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwOut()));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(stat.kwNet()));
 
         buffer.flip();
         return buffer.array();

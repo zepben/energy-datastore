@@ -56,14 +56,14 @@ public abstract class EnergyProfile {
         if (isCacheable) {
             return new EnergyProfile(id, date, kwIn, kwOut) {
                 @Override
-                final public boolean cacheable() {
+                public boolean cacheable() {
                     return true;
                 }
             };
         } else {
             return new EnergyProfile(id, date, kwIn, kwOut) {
                 @Override
-                final public boolean cacheable() {
+                public boolean cacheable() {
                     return false;
                 }
             };
@@ -132,7 +132,7 @@ public abstract class EnergyProfile {
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof EnergyProfile)) return false;
         EnergyProfile profile = (EnergyProfile) o;
         return Objects.equals(id, profile.id) &&
             Objects.equals(date, profile.date) &&

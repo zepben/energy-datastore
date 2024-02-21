@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,12 +34,12 @@ public class SqliteByDateBlobStoreProviderTest {
 
     private File folder;
     private SqliteByDateBlobStoreProvider provider;
-    private LocalDate date = LocalDate.now();
-    private ZoneId timeZone = ZoneId.of("Australia/Canberra");
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final ZoneId timeZone = ZoneId.of("Australia/Canberra");
     private SqliteBlobStore blobStore = null;
 
     @BeforeEach
-    public void before(@TempDir Path tempDir) throws IOException {
+    public void before(@TempDir Path tempDir) {
         folder = tempDir.toFile();
         EwbDataFilePaths ewbFilePaths = new EwbDataFilePaths(tempDir.toString());
         provider = new SqliteByDateBlobStoreProvider(ewbFilePaths);
@@ -72,7 +71,7 @@ public class SqliteByDateBlobStoreProviderTest {
         blobStore = provider.get(date, timeZone, true);
         assertNotNull(blobStore);
 
-        String dateStr = blobStore.reader().getMetadata(METADATA_DATE_ID);
+        String dateStr = blobStore.getReader().getMetadata(METADATA_DATE_ID);
         assertNotNull(dateStr);
         LocalDate getDate = LocalDate.parse(dateStr);
         assertThat(getDate, equalTo(date));
@@ -83,7 +82,7 @@ public class SqliteByDateBlobStoreProviderTest {
         blobStore = provider.get(date, timeZone, true);
         assertNotNull(blobStore);
 
-        String tzStr = blobStore.reader().getMetadata(METADATA_TIME_ZONE_ID);
+        String tzStr = blobStore.getReader().getMetadata(METADATA_TIME_ZONE_ID);
         assertNotNull(tzStr);
         ZoneId getTz = ZoneId.of(tzStr);
         assertThat(getTz, equalTo(timeZone));
@@ -105,8 +104,8 @@ public class SqliteByDateBlobStoreProviderTest {
         assertNotNull(blobStore);
 
         LocalDate newDate = date.plusDays(1);
-        blobStore.writer().updateMetadata(METADATA_DATE_ID, newDate.toString());
-        blobStore.writer().commit();
+        blobStore.getWriter().updateMetadata(METADATA_DATE_ID, newDate.toString());
+        blobStore.getWriter().commit();
         blobStore.close();
 
         String msg = String.format("metadata %s was '%s', expected '%s'", METADATA_DATE_ID, newDate, date);
@@ -120,8 +119,8 @@ public class SqliteByDateBlobStoreProviderTest {
         blobStore = provider.get(date, timeZone, true);
         assertNotNull(blobStore);
 
-        blobStore.writer().deleteMetadata(METADATA_DATE_ID);
-        blobStore.writer().commit();
+        blobStore.getWriter().deleteMetadata(METADATA_DATE_ID);
+        blobStore.getWriter().commit();
         blobStore.close();
 
         expect(() -> blobStore = provider.get(date, timeZone, true))
@@ -135,8 +134,8 @@ public class SqliteByDateBlobStoreProviderTest {
         assertNotNull(blobStore);
 
         ZoneId newTimeZone = ZoneId.of("Z");
-        blobStore.writer().updateMetadata(METADATA_TIME_ZONE_ID, newTimeZone.toString());
-        blobStore.writer().commit();
+        blobStore.getWriter().updateMetadata(METADATA_TIME_ZONE_ID, newTimeZone.toString());
+        blobStore.getWriter().commit();
         blobStore.close();
 
         String msg = String.format("metadata %s was '%s', expected '%s'", METADATA_TIME_ZONE_ID, newTimeZone, timeZone);
@@ -150,8 +149,8 @@ public class SqliteByDateBlobStoreProviderTest {
         blobStore = provider.get(date, timeZone, true);
         assertNotNull(blobStore);
 
-        blobStore.writer().deleteMetadata(METADATA_TIME_ZONE_ID);
-        blobStore.writer().commit();
+        blobStore.getWriter().deleteMetadata(METADATA_TIME_ZONE_ID);
+        blobStore.getWriter().commit();
         blobStore.close();
 
         expect(() -> blobStore = provider.get(date, timeZone, true))

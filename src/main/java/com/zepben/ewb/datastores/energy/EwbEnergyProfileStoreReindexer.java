@@ -14,6 +14,7 @@ import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.itemwrappers.ByDateBlobReaderProvider;
 import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
 import com.zepben.ewb.filepaths.EwbDataFilePaths;
+import kotlin.Unit;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,6 +86,8 @@ public class EwbEnergyProfileStoreReindexer {
 
                         if (date.isAfter(range.to))
                             range.to = date;
+
+                        return Unit.INSTANCE;
                     });
                 }
             }
@@ -97,7 +100,7 @@ public class EwbEnergyProfileStoreReindexer {
 
     private void writeIndex(Map<String, Range> index) throws BlobStoreException {
         Progress progress = progressFactory.create("Saving index", index.size());
-        Path backupPath = Paths.get(ewbPaths.energyReadingsIndex().toString() + ".bak");
+        Path backupPath = Paths.get(ewbPaths.energyReadingsIndex() + ".bak");
         backupIndex(backupPath);
 
         boolean status = true;
@@ -120,7 +123,7 @@ public class EwbEnergyProfileStoreReindexer {
 
     private List<LocalDate> getAvailableDates() throws BlobStoreException {
         try {
-            try (Stream<Path> files = Files.walk(ewbPaths.baseDir(), 1)) {
+            try (Stream<Path> files = Files.walk(ewbPaths.getBaseDir(), 1)) {
                 return files
                     .map(file -> {
                         try {
@@ -163,7 +166,7 @@ public class EwbEnergyProfileStoreReindexer {
                 Files.move(backupPath, ewbPaths.energyReadingsIndex());
         } catch (IOException ex) {
             throw new BlobStoreException(
-                "Failed to restore index. You need to maually restore from backup file: " + backupPath,
+                "Failed to restore index. You need to manually restore from backup file: " + backupPath,
                 ex);
         }
     }
@@ -171,7 +174,7 @@ public class EwbEnergyProfileStoreReindexer {
     @EverythingIsNonnullByDefault
     private static class Range {
 
-        private String id;
+        private final String id;
         private LocalDate from;
         private LocalDate to;
 

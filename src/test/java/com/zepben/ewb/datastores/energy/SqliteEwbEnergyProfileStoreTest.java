@@ -43,13 +43,13 @@ import static org.mockito.Mockito.*;
 
 public class SqliteEwbEnergyProfileStoreTest {
 
-    private LocalDate date = LocalDate.now();
-    private ZoneId timeZone = ZoneId.systemDefault();
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final ZoneId timeZone = ZoneId.systemDefault();
     private EwbDataFilePaths paths;
     private SqliteEwbEnergyProfileStore store;
 
     @BeforeEach
-    public void before(@TempDir Path tempDir) throws Exception {
+    public void before(@TempDir Path tempDir) {
         paths = new EwbDataFilePaths(tempDir);
         store = new SqliteEwbEnergyProfileStore(paths, timeZone, EwbChannelFactory.DOUBLE_VALUES);
     }
@@ -69,7 +69,7 @@ public class SqliteEwbEnergyProfileStoreTest {
         store.writer().write(profile, onError);
         store.writer().commit(onError);
         verify(onError, never()).handle(any(), any(), any(), any());
-        assertTrue(Files.exists(paths.energyReadings(LocalDate.now())));
+        assertTrue(Files.exists(paths.energyReadings(LocalDate.now(ZoneId.systemDefault()))));
 
         EnergyProfile getProfile = store.reader().get("id", date, mock(ErrorHandler.class));
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -99,7 +99,7 @@ public class SqliteEwbEnergyProfileStoreTest {
 
         IdDateRange range = store.reader().getDateRange("id");
         assertNotNull(range);
-        assertThat(range, is(new IdDateRange("id", date, LocalDate.now())));
+        assertThat(range, is(new IdDateRange("id", date, LocalDate.now(ZoneId.systemDefault()))));
 
         profile = EnergyProfile.of("id", date.plusDays(1), kwIn, kwOut, true);
         onError = mock(ErrorHandler.class);
