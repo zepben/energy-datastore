@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -35,10 +36,10 @@ import static org.mockito.Mockito.*;
 
 public class ByDateBlobEnergyProfileReaderTest {
 
-    private String id = "id";
-    private LocalDate date = LocalDate.now();
+    private final String id = "id";
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
 
-    private DateRangeIndex dateRangeIndex = spy(new MockDateRangeIndex(Collections.singletonList(new IdDateRange(id, date, date))));
+    private final DateRangeIndex dateRangeIndex = spy(new MockDateRangeIndex(Collections.singletonList(new IdDateRange(id, date, date))));
     @Mock private ByDateItemReader<EnergyProfile> byDateItemReader;
     @Mock private Deserialiser<Readings> kwInDsx;
     @Mock private Deserialiser<Readings> kwOutDsx;
@@ -47,15 +48,15 @@ public class ByDateBlobEnergyProfileReaderTest {
     @Mock private ItemHandler<EnergyProfile> itemHandler;
     @Mock private ErrorHandler itemError;
 
-    @Captor private ArgumentCaptor<Map<String, ByDateTagDeserialiser>> tagsDeserialiserMapCaptor;
+    @Captor private ArgumentCaptor<Map<String, ByDateTagDeserialiser<?>>> tagsDeserialiserMapCaptor;
     @Captor private ArgumentCaptor<ByDateItemHandler<EnergyProfile>> byDateItemHandlerCaptor;
     @Captor private ArgumentCaptor<ByDateItemError> byDateItemErrorCaptor;
 
     private ByDateBlobEnergyProfileReader profileReader;
 
     @BeforeEach
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+    public void before() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
 
         Deserialisers deserialisers = new Deserialisers(kwInDsx, kwOutDsx, cacheableDsx, statDsx);
         profileReader = new ByDateBlobEnergyProfileReader(dateRangeIndex, byDateItemReader, EnergyProfile::of, deserialisers);
@@ -69,7 +70,7 @@ public class ByDateBlobEnergyProfileReaderTest {
     @Test
     public void registersAllTagsHandlers() {
         verify(byDateItemReader).setDeserialisers(any(), tagsDeserialiserMapCaptor.capture());
-        Map<String, ByDateTagDeserialiser> tagDeserialisers = tagsDeserialiserMapCaptor.getValue();
+        Map<String, ByDateTagDeserialiser<?>> tagDeserialisers = tagsDeserialiserMapCaptor.getValue();
 
         Object[] expectedKeys = Arrays.stream(EnergyProfileAttribute.values()).map(EnergyProfileAttribute::storeString).toArray();
         assertThat(tagDeserialisers.keySet(), containsInAnyOrder(expectedKeys));
@@ -135,32 +136,32 @@ public class ByDateBlobEnergyProfileReaderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void kwInTagDersialiser() throws Exception {
-        ByDateTagDeserialiser<Readings> deserialiser = profileReader.tagDeserialisers().get(KW_IN.storeString());
+        var deserialiser = (ByDateTagDeserialiser<Readings>)profileReader.tagDeserialisers().get(KW_IN.storeString());
 
         Readings readingsIn = Readings.of(Channel.of(1.));
         when(kwInDsx.dsx(any())).thenReturn(readingsIn);
-        Readings actual = deserialiser.deserialise("", LocalDate.now(), KW_IN.storeString(), new byte[]{});
+        Readings actual = deserialiser.deserialise("", LocalDate.now(ZoneId.systemDefault()), KW_IN.storeString(), new byte[]{});
         assertThat(actual, equalTo(readingsIn));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void kwOutTagDersialiser() throws Exception {
-        ByDateTagDeserialiser<Readings> deserialiser = profileReader.tagDeserialisers().get(KW_OUT.storeString());
+        var deserialiser = (ByDateTagDeserialiser<Readings>)profileReader.tagDeserialisers().get(KW_OUT.storeString());
 
         Readings readingsOut = Readings.of(Channel.of(1.));
         when(kwOutDsx.dsx(any())).thenReturn(readingsOut);
-        Readings actual = deserialiser.deserialise("", LocalDate.now(), KW_OUT.storeString(), new byte[]{});
+        Readings actual = deserialiser.deserialise("", LocalDate.now(ZoneId.systemDefault()), KW_OUT.storeString(), new byte[]{});
         assertThat(actual, equalTo(readingsOut));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void isCacheableTagDersialiser() throws Exception {
-        ByDateTagDeserialiser<Boolean> deserialiser = profileReader.tagDeserialisers().get(CACHEABLE.storeString());
+        var deserialiser = (ByDateTagDeserialiser<Boolean>)profileReader.tagDeserialisers().get(CACHEABLE.storeString());
 
         when(cacheableDsx.dsx(any())).thenReturn(true);
-        Boolean actual = deserialiser.deserialise("", LocalDate.now(), CACHEABLE.storeString(), new byte[]{1});
+        Boolean actual = deserialiser.deserialise("", LocalDate.now(ZoneId.systemDefault()), CACHEABLE.storeString(), new byte[]{1});
         assertThat(actual, equalTo(true));
     }
 
@@ -308,7 +309,7 @@ public class ByDateBlobEnergyProfileReaderTest {
 
         EnergyProfile profile = EnergyProfile.of(
             "id",
-            LocalDate.now(),
+            LocalDate.now(ZoneId.systemDefault()),
             Readings.of(Channel.of(1, 3, 2)),
             Readings.of(Channel.of(4, 6, 5)));
 

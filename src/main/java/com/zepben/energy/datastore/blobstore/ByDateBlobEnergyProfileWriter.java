@@ -18,9 +18,10 @@ import com.zepben.energy.model.EnergyProfile;
 import com.zepben.energy.model.EnergyProfileStat;
 import com.zepben.energy.model.MissingReadings;
 import com.zepben.energy.model.Readings;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 import java.time.LocalDate;
-import java.util.function.BiConsumer;
 
 import static com.zepben.energy.datastore.blobstore.EnergyProfileAttribute.*;
 
@@ -66,6 +67,7 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
         return true;
     }
 
+    @Override
     public boolean writeKwIn(String id,
                              LocalDate date,
                              Readings readings,
@@ -77,6 +79,7 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
         return true;
     }
 
+    @Override
     public boolean writeKwOut(String id,
                               LocalDate date,
                               Readings readings,
@@ -88,6 +91,7 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
         return true;
     }
 
+    @Override
     public boolean writeCacheable(String id,
                                   LocalDate date,
                                   boolean cacheable,
@@ -99,7 +103,7 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
         return true;
     }
 
-    private BiConsumer<ItemBlobWriter, EnergyProfile> getProfileWriteHandler(boolean writeStats) {
+    private Function2<ItemBlobWriter, EnergyProfile, Unit> getProfileWriteHandler(boolean writeStats) {
         return (writer, profile) -> {
             writeReadings(writer, KW_IN, profile.kwIn(), serialisers.kwInSx(), false);
             writeReadings(writer, KW_OUT, profile.kwOut(), serialisers.kwOutSx(), false);
@@ -110,12 +114,16 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
             } else {
                 deleteStats(writer);
             }
+            return Unit.INSTANCE;
         };
     }
 
-    private BiConsumer<ItemBlobWriter, Readings> getReadingsWriteHandler(EnergyProfileAttribute tag,
-                                                                         Serialiser<Readings> sx) {
-        return (writer, readings) -> writeReadings(writer, tag, readings, sx, true);
+    private Function2<ItemBlobWriter, Readings, Unit> getReadingsWriteHandler(EnergyProfileAttribute tag,
+                                                                              Serialiser<Readings> sx) {
+        return (writer, readings) -> {
+            writeReadings(writer, tag, readings, sx, true);
+            return Unit.INSTANCE;
+        };
     }
 
     private void writeReadings(ItemBlobWriter writer,
@@ -133,13 +141,14 @@ public class ByDateBlobEnergyProfileWriter implements EnergyProfileWriter {
             deleteStats(writer);
     }
 
-    private void writeCacheable(ItemBlobWriter writer, boolean cacheable) {
+    private Unit writeCacheable(ItemBlobWriter writer, boolean cacheable) {
         if (cacheable) {
             Serialiser<Boolean> sx = serialisers.cacheableSx();
             writer.write(CACHEABLE.storeString(), sx.sx(true), sx.sxOffset(), sx.sxLength());
         } else {
             writer.delete(CACHEABLE.storeString());
         }
+        return Unit.INSTANCE;
     }
 
     private void writeStats(ItemBlobWriter writer, EnergyProfile profile) {

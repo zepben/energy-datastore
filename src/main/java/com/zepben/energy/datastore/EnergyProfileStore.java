@@ -17,6 +17,7 @@ public interface EnergyProfileStore extends AutoCloseable {
 
     EnergyProfileWriter writer();
 
+    @Override
     void close() throws EnergyProfileStoreException;
 
 }

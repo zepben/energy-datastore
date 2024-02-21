@@ -33,29 +33,29 @@ import static org.mockito.Mockito.*;
 
 public class ByDateBlobEnergyProfileWriterTest {
 
-    private String id = "id";
-    private LocalDate date = LocalDate.now();
-    private ZoneId timeZone = ZoneId.systemDefault();
+    private final String id = "id";
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final ZoneId timeZone = ZoneId.systemDefault();
 
-    private DateRangeIndex dateRangeIndex = spy(new MockDateRangeIndex(Collections.emptyList()));
+    private final DateRangeIndex dateRangeIndex = spy(new MockDateRangeIndex(Collections.emptyList()));
 
     @Mock private BlobWriter blobWriter;
     @Mock private Serialiser<Readings> kwInSx;
     @Mock private Serialiser<Readings> kwOutSx;
     @Mock private Serialiser<Boolean> cacheableSx;
     @Mock private Serialiser<EnergyProfileStat> statSx;
-    private ByDateItemWriter byDateItemWriter = spy(new ByDateItemWriter(timeZone, (date, tz) -> blobWriter));
+    private final ByDateItemWriter byDateItemWriter = spy(new ByDateItemWriter(timeZone, (date, tz) -> blobWriter));
     private EnergyProfileWriter profileWriter;
-    private ErrorHandler onError = mock(ErrorHandler.class);
+    private final ErrorHandler onError = mock(ErrorHandler.class);
 
-    private byte[] kwInBytes = new byte[]{2};
-    private byte[] kwOutBytes = new byte[]{3};
-    private byte[] cacheableBytes = new byte[]{1};
-    private byte[] statBytes = new byte[]{4};
+    private final byte[] kwInBytes = new byte[]{2};
+    private final byte[] kwOutBytes = new byte[]{3};
+    private final byte[] cacheableBytes = new byte[]{1};
+    private final byte[] statBytes = new byte[]{4};
 
     @BeforeEach
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+    public void before() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
 
         setupSerialisers();
         Serialisers serialisers = new Serialisers(kwInSx, kwOutSx, cacheableSx, statSx);
@@ -93,9 +93,7 @@ public class ByDateBlobEnergyProfileWriterTest {
     }
 
     private void setupBlobWriter(boolean write, boolean update, boolean delete) throws BlobStoreException {
-        when(blobWriter.write(anyString(), anyString(), any(byte[].class))).thenReturn(write);
         when(blobWriter.write(anyString(), anyString(), any(byte[].class), anyInt(), anyInt())).thenReturn(write);
-        when(blobWriter.update(anyString(), anyString(), any(byte[].class))).thenReturn(update);
         when(blobWriter.update(anyString(), anyString(), any(byte[].class), anyInt(), anyInt())).thenReturn(update);
         when(blobWriter.delete(anyString(), anyString())).thenReturn(delete);
     }
@@ -126,7 +124,7 @@ public class ByDateBlobEnergyProfileWriterTest {
         setupBlobWriter(true, false, true);
 
         assertTrue(profileWriter.write(profile, onError));
-        verify(blobWriter, never()).write(profile.id(), CACHEABLE.storeString(), new byte[]{1});
+        verify(blobWriter, never()).write(profile.id(), CACHEABLE.storeString(), new byte[]{1}, 0, 1);
         verify(profile).cacheable();
 
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -183,7 +181,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(true, false, false);
 
-        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).write("id", KW_IN.storeString(), kwInBytes, 0, kwInBytes.length);
         verify(onError, never()).handle(any(), any(), any(), any());
         verify(dateRangeIndex).extendRange(id, date);
@@ -195,7 +193,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, true, false);
 
-        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).update("id", KW_IN.storeString(), kwInBytes, 0, kwInBytes.length);
         verify(onError, never()).handle(any(), any(), any(), any());
         verify(dateRangeIndex).extendRange(id, date);
@@ -207,7 +205,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(true, false, true);
 
-        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).delete("id", MAXIMUMS.storeString());
     }
 
@@ -217,10 +215,10 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, false, false);
 
-        assertFalse(profileWriter.writeKwIn("id", LocalDate.now(), readings, onError));
+        assertFalse(profileWriter.writeKwIn("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).write("id", KW_IN.storeString(), kwInBytes, 0, kwInBytes.length);
         verify(blobWriter).update("id", KW_IN.storeString(), kwInBytes, 0, kwInBytes.length);
-        verify(onError).handle("id", LocalDate.now(), "Failed to write", null);
+        verify(onError).handle("id", LocalDate.now(ZoneId.systemDefault()), "Failed to write", null);
         verify(dateRangeIndex, never()).extendRange(any(), any());
     }
 
@@ -230,7 +228,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, false, true);
 
-        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwIn("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
 
         verify(blobWriter).delete("id", KW_IN.storeString());
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -242,7 +240,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(true, false, false);
 
-        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).write("id", KW_OUT.storeString(), kwOutBytes, 0, kwOutBytes.length);
 
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -255,7 +253,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, true, false);
 
-        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).update("id", KW_OUT.storeString(), kwOutBytes, 0, kwOutBytes.length);
 
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -268,7 +266,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(true, false, true);
 
-        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).delete("id", MAXIMUMS.storeString());
     }
 
@@ -278,10 +276,10 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, false, false);
 
-        assertFalse(profileWriter.writeKwOut("id", LocalDate.now(), readings, onError));
+        assertFalse(profileWriter.writeKwOut("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
         verify(blobWriter).write("id", KW_OUT.storeString(), kwOutBytes, 0, kwOutBytes.length);
         verify(blobWriter).update("id", KW_OUT.storeString(), kwOutBytes, 0, kwOutBytes.length);
-        verify(onError).handle("id", LocalDate.now(), "Failed to write", null);
+        verify(onError).handle("id", LocalDate.now(ZoneId.systemDefault()), "Failed to write", null);
         verify(dateRangeIndex, never()).extendRange(any(), any());
     }
 
@@ -291,7 +289,7 @@ public class ByDateBlobEnergyProfileWriterTest {
 
         setupBlobWriter(false, false, true);
 
-        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(), readings, onError));
+        assertTrue(profileWriter.writeKwOut("id", LocalDate.now(ZoneId.systemDefault()), readings, onError));
 
         verify(blobWriter).delete("id", KW_OUT.storeString());
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -301,7 +299,7 @@ public class ByDateBlobEnergyProfileWriterTest {
     public void writesCacheable() throws BlobStoreException {
         setupBlobWriter(true, false, false);
 
-        assertTrue(profileWriter.writeCacheable("id", LocalDate.now(), true, onError));
+        assertTrue(profileWriter.writeCacheable("id", LocalDate.now(ZoneId.systemDefault()), true, onError));
         verify(blobWriter).write("id", CACHEABLE.storeString(), cacheableBytes, 0, cacheableBytes.length);
 
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -312,7 +310,7 @@ public class ByDateBlobEnergyProfileWriterTest {
     public void updatesCacheable() throws BlobStoreException {
         setupBlobWriter(false, false, true);
 
-        assertTrue(profileWriter.writeCacheable("id", LocalDate.now(), false, onError));
+        assertTrue(profileWriter.writeCacheable("id", LocalDate.now(ZoneId.systemDefault()), false, onError));
         verify(blobWriter).delete("id", CACHEABLE.storeString());
 
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -323,9 +321,9 @@ public class ByDateBlobEnergyProfileWriterTest {
     public void cacheableError() throws BlobStoreException {
         setupBlobWriter(false, false, false);
 
-        assertFalse(profileWriter.writeCacheable("id", LocalDate.now(), true, onError));
+        assertFalse(profileWriter.writeCacheable("id", LocalDate.now(ZoneId.systemDefault()), true, onError));
         verify(blobWriter).write("id", CACHEABLE.storeString(), new byte[]{1}, 0, 1);
-        verify(onError).handle("id", LocalDate.now(), "Failed to write", null);
+        verify(onError).handle("id", LocalDate.now(ZoneId.systemDefault()), "Failed to write", null);
         verify(dateRangeIndex, never()).extendRange(any(), any());
     }
 
@@ -336,7 +334,7 @@ public class ByDateBlobEnergyProfileWriterTest {
         setupBlobWriter(false, false, false);
 
         profileWriter.write(profile, onError);
-        verify(onError).handle("id", LocalDate.now(), "Failed to write", null);
+        verify(onError).handle("id", LocalDate.now(ZoneId.systemDefault()), "Failed to write", null);
     }
 
     @Test

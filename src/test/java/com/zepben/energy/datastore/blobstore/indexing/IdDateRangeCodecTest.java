@@ -13,17 +13,18 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public class IdDateRangeCodecTest {
 
-    private IdDateRangeCodec codec = new IdDateRangeCodec();
+    private final IdDateRangeCodec codec = new IdDateRangeCodec();
 
     @Test
     public void serialises() {
-        LocalDate from = LocalDate.now();
+        LocalDate from = LocalDate.now(ZoneId.systemDefault());
         LocalDate to = from.plusDays(721);
         byte[] bytes = codec.serialise(from, to);
 
@@ -40,7 +41,7 @@ public class IdDateRangeCodecTest {
 
     @Test
     public void deserialisers() {
-        LocalDate from = LocalDate.now();
+        LocalDate from = LocalDate.now(ZoneId.systemDefault());
         LocalDate to = from.plusDays(721);
 
         ByteBuffer buffer = ByteBuffer.allocate(12);

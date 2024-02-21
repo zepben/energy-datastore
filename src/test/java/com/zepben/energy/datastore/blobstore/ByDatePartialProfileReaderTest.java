@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,17 +40,17 @@ public class ByDatePartialProfileReaderTest {
 
     @Mock private ByDateItemReader<EnergyProfile> itemReader;
     @Mock private DateRangeTest dateRangeTest;
-    private EnergyProfileAttribute tag = EnergyProfileAttribute.KW_IN;
+    private final EnergyProfileAttribute tag = EnergyProfileAttribute.KW_IN;
     private ByDatePartialProfileReader<Readings> reader;
     @Mock private ItemHandler<Readings> itemHandler;
     @Captor private ArgumentCaptor<ByDateItemHandler<Readings>> itemHandlerCaptor;
     @Mock private ErrorHandler onError;
     @Captor private ArgumentCaptor<ByDateItemError> onErrorCaptor;
-    private LocalDate date = LocalDate.now();
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
 
     @BeforeEach
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+    public void before() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
         doReturn(true).when(dateRangeTest).idHasDate(any(), any());
         doAnswer(inv -> inv.getArgument(0)).when(dateRangeTest).filterIdsWithDate(any(), any());
         reader = new ByDatePartialProfileReader<>(tag, itemReader, dateRangeTest);
@@ -94,7 +95,7 @@ public class ByDatePartialProfileReaderTest {
     }
 
     @Test
-    public void forEachFiltersIdsWhenNotInDate() throws Exception {
+    public void forEachFiltersIdsWhenNotInDate() {
         Collection<String> ids = Arrays.asList("id1", "id2");
         doReturn(Collections.singletonList("id2")).when(dateRangeTest).filterIdsWithDate(ids, date);
         reader.forEach(ids, date, itemHandler, onError);
@@ -102,7 +103,7 @@ public class ByDatePartialProfileReaderTest {
     }
 
     @Test
-    public void forEachShortCircuitsWhenNoneIdDate() throws Exception {
+    public void forEachShortCircuitsWhenNoneIdDate() {
         Collection<String> ids = Arrays.asList("id1", "id2");
         doReturn(Collections.emptyList()).when(dateRangeTest).filterIdsWithDate(ids, date);
         reader.forEach(ids, date, itemHandler, onError);

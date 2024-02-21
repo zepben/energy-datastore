@@ -14,6 +14,8 @@ import com.zepben.blobstore.BlobStore;
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.BlobWriter;
 import com.zepben.energy.model.IdDateRange;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function3;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
@@ -34,16 +37,17 @@ import static org.mockito.Mockito.*;
 
 public class BlobDateRangeIndexTest {
 
+    @SuppressWarnings("NullableProblems")
     @EverythingIsNonnullByDefault
     class MockBlobStore implements BlobStore {
 
         @Override
-        public BlobReader reader() {
+        public BlobReader getReader() {
             return blobReader;
         }
 
         @Override
-        public BlobWriter writer() {
+        public BlobWriter getWriter() {
             return blobWriter;
         }
 
@@ -54,26 +58,26 @@ public class BlobDateRangeIndexTest {
 
     }
 
-    private BlobReader blobReader = mock(BlobReader.class);
-    private BlobWriter blobWriter = mock(BlobWriter.class);
-    private BlobStore blobStore = spy(new MockBlobStore());
+    private final BlobReader blobReader = mock(BlobReader.class);
+    private final BlobWriter blobWriter = mock(BlobWriter.class);
+    private final BlobStore blobStore = spy(new MockBlobStore());
     private BlobDateRangeIndex index = new BlobDateRangeIndex(blobStore);
     @Mock private Consumer<IdDateRange> handler;
-    @Captor private ArgumentCaptor<BlobReader.BlobHandler> blobHandlerCaptor;
+    @Captor private ArgumentCaptor<Function3<String, String, byte[], Unit>> blobHandlerCaptor;
 
-    private String id = "id";
-    private LocalDate from = LocalDate.now();
-    private LocalDate to = from.plusDays(10);
-    private IdDateRange expectedRange = new IdDateRange(id, from, to);
-    private byte[] rangeBytes = new IdDateRangeCodec().serialise(from, to);
+    private final String id = "id";
+    private final LocalDate from = LocalDate.now(ZoneId.systemDefault());
+    private final LocalDate to = from.plusDays(10);
+    private final IdDateRange expectedRange = new IdDateRange(id, from, to);
+    private final byte[] rangeBytes = new IdDateRangeCodec().serialise(from, to);
 
     @BeforeEach
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+    public void before() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
     }
 
     @Test
-    public void closesBlobStre() throws Exception {
+    public void closesBlobStore() throws Exception {
         index.close();
         verify(blobStore).close();
     }
@@ -91,7 +95,7 @@ public class BlobDateRangeIndexTest {
         index.forEach(ids, handler);
 
         verify(blobReader).forEach(eq(ids), eq(STORE_TAG), blobHandlerCaptor.capture());
-        blobHandlerCaptor.getValue().handle(id, STORE_TAG, rangeBytes);
+        blobHandlerCaptor.getValue().invoke(id, STORE_TAG, rangeBytes);
         verify(handler).accept(expectedRange);
     }
 
@@ -100,28 +104,28 @@ public class BlobDateRangeIndexTest {
         index.forAll(handler);
 
         verify(blobReader).forAll(eq(STORE_TAG), blobHandlerCaptor.capture());
-        blobHandlerCaptor.getValue().handle(id, STORE_TAG, rangeBytes);
+        blobHandlerCaptor.getValue().invoke(id, STORE_TAG, rangeBytes);
         verify(handler).accept(expectedRange);
     }
 
     @Test
     public void saveWrites() throws Exception {
-        doReturn(false).when(blobWriter).update(any(), any(), any());
-        doReturn(true).when(blobWriter).write(any(), any(), any());
+        doReturn(false).when(blobWriter).update(any(), any(), any(), anyInt(), anyInt());
+        doReturn(true).when(blobWriter).write(any(), any(), any(), anyInt(), anyInt());
         assertThat(index.save(id, from, to), is(true));
-        verify(blobWriter).write(id, STORE_TAG, rangeBytes);
+        verify(blobWriter).write(id, STORE_TAG, rangeBytes, 0, rangeBytes.length);
     }
 
     @Test
     public void saveUpdates() throws Exception {
-        doReturn(true).when(blobWriter).update(any(), any(), any());
+        doReturn(true).when(blobWriter).update(any(), any(), any(), anyInt(), anyInt());
         assertThat(index.save(id, from, to), is(true));
-        verify(blobWriter).update(id, STORE_TAG, rangeBytes);
+        verify(blobWriter).update(id, STORE_TAG, rangeBytes, 0, rangeBytes.length);
     }
 
     @Test
     public void saveReturnsFalseOnException() throws Exception {
-        doThrow(new BlobStoreException("test", null)).when(blobWriter).update(any(), any(), any());
+        doThrow(new BlobStoreException("test", null)).when(blobWriter).update(any(), any(), any(), anyInt(), anyInt());
         assertThat(index.save(id, from, to), is(false));
     }
 
@@ -134,7 +138,7 @@ public class BlobDateRangeIndexTest {
     public void updatesFrom() throws Exception {
         index = spy(index);
         doReturn(expectedRange).when(index).get(id);
-        doReturn(true).when(blobWriter).update(any(), any(), any());
+        doReturn(true).when(blobWriter).update(any(), any(), any(), anyInt(), anyInt());
 
         LocalDate newFrom = from.plusDays(1);
         assertThat(index.saveFrom(id, newFrom), is(true));
@@ -164,7 +168,7 @@ public class BlobDateRangeIndexTest {
     public void updatesTo() throws Exception {
         index = spy(index);
         doReturn(expectedRange).when(index).get(id);
-        doReturn(true).when(blobWriter).update(any(), any(), any());
+        doReturn(true).when(blobWriter).update(any(), any(), any(), anyInt(), anyInt());
 
         LocalDate newTo = to.plusDays(1);
         assertThat(index.saveTo(id, newTo), is(true));

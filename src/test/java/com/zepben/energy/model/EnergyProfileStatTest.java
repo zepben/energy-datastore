@@ -12,6 +12,7 @@ package com.zepben.energy.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static com.zepben.testutils.exception.ExpectException.expect;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,11 +20,11 @@ import static org.hamcrest.Matchers.is;
 
 public class EnergyProfileStatTest {
 
-    private String id = "id";
-    private LocalDate date = LocalDate.now();
-    private Readings kwIn = Readings.of(Channel.of(1, 3, 2));
-    private Readings kwOut = Readings.of(Channel.of(5, 4, 0));
-    private EnergyProfile profile = EnergyProfile.of(id, date, kwIn, kwOut);
+    private final String id = "id";
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final Readings kwIn = Readings.of(Channel.of(1, 3, 2));
+    private final Readings kwOut = Readings.of(Channel.of(5, 4, 0));
+    private final EnergyProfile profile = EnergyProfile.of(id, date, kwIn, kwOut);
 
     @Test
     public void publicConstructor() {

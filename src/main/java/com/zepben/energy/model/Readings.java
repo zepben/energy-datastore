@@ -39,7 +39,7 @@ public abstract class Readings implements DoubleArrayView {
     };
 
     public static Readings of(Channel channel) {
-        if (channel == Channel.EMPTY_CHANNEL)
+        if (channel.equals(Channel.EMPTY_CHANNEL))
             return EMPTY_READINGS;
 
         return new OneChannelReadings(channel);
@@ -91,7 +91,7 @@ public abstract class Readings implements DoubleArrayView {
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Readings)) return false;
         Readings that = (Readings) o;
         return Arrays.equals(channelStream().toArray(), that.channelStream().toArray());
     }

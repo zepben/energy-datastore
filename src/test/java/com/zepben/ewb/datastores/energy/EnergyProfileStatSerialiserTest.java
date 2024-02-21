@@ -23,8 +23,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 public class EnergyProfileStatSerialiserTest {
 
-    private EnergyProfileStatSerialiser sx = new EnergyProfileStatSerialiser();
-    private EnergyProfileStatDeserialiser dsx = new EnergyProfileStatDeserialiser();
+    private final EnergyProfileStatSerialiser sx = new EnergyProfileStatSerialiser();
+    private final EnergyProfileStatDeserialiser dsx = new EnergyProfileStatDeserialiser();
 
     @Test
     public void serialiseDeserialise() {
@@ -35,9 +35,9 @@ public class EnergyProfileStatSerialiserTest {
         byte[] bytes = sx.sx(stat);
 
         ByteBuffer buffer = ByteBuffer.allocate(6);
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwIn));
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwOut));
-        BytesUtil.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwNet));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwIn));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwOut));
+        BytesUtil.INSTANCE.encode7BitLong(buffer, KToUnitCodec.kToUnit(kwNet));
         buffer.flip();
 
         assertThat(sx.sxOffset(), is(0));

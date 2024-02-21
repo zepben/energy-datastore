@@ -89,7 +89,7 @@ class SqliteByDateBlobStoreProvider implements ByDateBlobStoreProvider {
 
     @Nullable
     private LocalDate getMetaDataDate(SqliteBlobStore blobStore) throws BlobStoreException {
-        String date = blobStore.reader().getMetadata(METADATA_DATE_ID);
+        String date = blobStore.getReader().getMetadata(METADATA_DATE_ID);
         if (date == null)
             return null;
 
@@ -98,7 +98,7 @@ class SqliteByDateBlobStoreProvider implements ByDateBlobStoreProvider {
 
     @Nullable
     private ZoneId getMetaDataTimeZone(SqliteBlobStore blobStore) throws BlobStoreException {
-        String timeZone = blobStore.reader().getMetadata(METADATA_TIME_ZONE_ID);
+        String timeZone = blobStore.getReader().getMetadata(METADATA_TIME_ZONE_ID);
         if (timeZone == null)
             return null;
 
@@ -106,9 +106,9 @@ class SqliteByDateBlobStoreProvider implements ByDateBlobStoreProvider {
     }
 
     private void writeDateMetadata(SqliteBlobStore blobStore, LocalDate date, ZoneId zoneId) throws BlobStoreException {
-        blobStore.writer().writeMetadata(METADATA_DATE_ID, date.toString());
-        blobStore.writer().writeMetadata(METADATA_TIME_ZONE_ID, zoneId.getId());
-        blobStore.writer().commit();
+        blobStore.getWriter().writeMetadata(METADATA_DATE_ID, date.toString());
+        blobStore.getWriter().writeMetadata(METADATA_TIME_ZONE_ID, zoneId.getId());
+        blobStore.getWriter().commit();
     }
 
 }

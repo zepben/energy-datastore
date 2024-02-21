@@ -12,6 +12,7 @@ import com.zepben.energy.model.IdDateRange;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,13 +24,13 @@ import static org.mockito.Mockito.*;
 
 public class CachedDateRangeIndexTest {
 
-    private DateRangeIndex index = mock(DateRangeIndex.class);
-    private CachedDateRangeIndex cachedIndex = new CachedDateRangeIndex(index);
+    private final DateRangeIndex index = mock(DateRangeIndex.class);
+    private final CachedDateRangeIndex cachedIndex = new CachedDateRangeIndex(index);
 
-    private String id = "id";
-    private LocalDate from = LocalDate.now();
-    private LocalDate to = from.plusDays(1);
-    private IdDateRange expectedRange = new IdDateRange(id, from, to);
+    private final String id = "id";
+    private final LocalDate from = LocalDate.now(ZoneId.systemDefault());
+    private final LocalDate to = from.plusDays(1);
+    private final IdDateRange expectedRange = new IdDateRange(id, from, to);
 
     @Test
     public void get() throws Exception {
@@ -45,7 +46,7 @@ public class CachedDateRangeIndexTest {
     }
 
     @Test
-    public void forEach() throws Exception {
+    public void forEach() {
         List<String> ids = Collections.singletonList(id);
         doAnswer(inv -> {
             Consumer<IdDateRange> handler = inv.getArgument(1);
@@ -65,7 +66,7 @@ public class CachedDateRangeIndexTest {
     }
 
     @Test
-    public void forAll() throws Exception {
+    public void forAll() {
         doAnswer(inv -> {
             Consumer<IdDateRange> handler = inv.getArgument(0);
             handler.accept(expectedRange);
@@ -84,7 +85,7 @@ public class CachedDateRangeIndexTest {
     }
 
     @Test
-    public void cachesOnsave() throws Exception {
+    public void cachesOnSave() {
         cachedIndex.save(expectedRange.id(), expectedRange.from(), expectedRange.to());
         verify(index).save(expectedRange.id(), expectedRange.from(), expectedRange.to());
 
@@ -95,21 +96,21 @@ public class CachedDateRangeIndexTest {
     }
 
     @Test
-    public void doesNotResaveWhenCachedValueEqual() throws Exception {
+    public void doesNotReSaveWhenCachedValueEqual() {
         cachedIndex.save(expectedRange.id(), expectedRange.from(), expectedRange.to());
         cachedIndex.save(expectedRange.id(), expectedRange.from(), expectedRange.to());
         verify(index, times(1)).save(expectedRange.id(), expectedRange.from(), expectedRange.to());
     }
 
     @Test
-    public void commits() throws Exception {
+    public void commits() {
         doReturn(true).when(index).commit();
         cachedIndex.commit();
         verify(index).commit();
     }
 
     @Test
-    public void clearsCacheOnCommitError() throws Exception {
+    public void clearsCacheOnCommitError() {
         doReturn(false).when(index).commit();
 
         cachedIndex.save(expectedRange.id(), expectedRange.from(), expectedRange.to());
@@ -121,7 +122,7 @@ public class CachedDateRangeIndexTest {
     }
 
     @Test
-    public void rollsback() throws Exception {
+    public void rollsBack() {
         doReturn(true).when(index).rollback();
         cachedIndex.rollback();
         verify(index).rollback();

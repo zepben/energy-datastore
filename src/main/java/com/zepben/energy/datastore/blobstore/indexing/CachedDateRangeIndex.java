@@ -115,8 +115,4 @@ public class CachedDateRangeIndex implements DateRangeIndex {
         return index.rollback();
     }
 
-    private IdDateRange badRange(String id) {
-        return new IdDateRange(id, LocalDate.now().minusYears(10), LocalDate.now().minusYears(10));
-    }
-
 }

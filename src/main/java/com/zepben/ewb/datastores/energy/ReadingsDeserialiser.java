@@ -89,7 +89,7 @@ class ReadingsDeserialiser implements Deserialiser<Readings> {
             } else {
                 allZeroed = false;
                 for (int interval = 0; interval < nIntervals; ++interval) {
-                    double value = KToUnitCodec.unitToK(BytesUtil.decode7BitLong(buffer));
+                    double value = KToUnitCodec.unitToK(BytesUtil.INSTANCE.decode7BitLong(buffer));
                     values[interval] = value;
                 }
                 channel = channelFactory.create(values);

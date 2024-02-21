@@ -42,13 +42,13 @@ class ReadingsSerialiser implements Serialiser<Readings> {
             Channel channel = readings.channel(channelNum);
 
             buffer.mark();
-            buffer.put((byte) (channelNum));
+            buffer.put((byte) channelNum);
 
             boolean allZero = true;
             for (int i = 0, n = channel.length(); i < n; ++i) {
                 long value = KToUnitCodec.kToUnit(channel.get(i));
                 allZero &= value == 0;
-                BytesUtil.encode7BitLong(buffer, value);
+                BytesUtil.INSTANCE.encode7BitLong(buffer, value);
             }
 
             // If the whole array was zero valued, we don't save all the values. We just store the channel number as a

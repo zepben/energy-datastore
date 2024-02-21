@@ -12,16 +12,17 @@ package com.zepben.energy.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class IdDateRangeTest {
 
-    private String id = "id";
-    private LocalDate from = LocalDate.now();
-    private LocalDate to = from.plusDays(7);
-    private IdDateRange range = new IdDateRange(id, from, to);
+    private final String id = "id";
+    private final LocalDate from = LocalDate.now(ZoneId.systemDefault());
+    private final LocalDate to = from.plusDays(7);
+    private final IdDateRange range = new IdDateRange(id, from, to);
 
     @Test
     public void id() {

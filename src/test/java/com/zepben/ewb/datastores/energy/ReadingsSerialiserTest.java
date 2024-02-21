@@ -39,13 +39,13 @@ public class ReadingsSerialiserTest {
         buffer.put((byte) channels.length);
         buffer.putInt(channels[0].length());
         buffer.put((byte) 1);
-        BytesUtil.encode7BitLong(buffer, -1100L);
-        BytesUtil.encode7BitLong(buffer, 0L);
-        BytesUtil.encode7BitLong(buffer, 2200L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, -1100L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, 0L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, 2200L);
         buffer.put((byte) 2);
-        BytesUtil.encode7BitLong(buffer, 500L);
-        BytesUtil.encode7BitLong(buffer, 33000L);
-        BytesUtil.encode7BitLong(buffer, 44400L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, 500L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, 33000L);
+        BytesUtil.INSTANCE.encode7BitLong(buffer, 44400L);
         buffer.put((byte) -3);
         buffer.flip();
 

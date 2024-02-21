@@ -36,16 +36,16 @@ import static org.mockito.Mockito.*;
 
 public class EwbEnergyProfileStoreReindexerTest {
 
-    private Progress progress = mock(Progress.class);
-    private Progress.Factory progressFactory = mock(Progress.Factory.class);
+    private final Progress progress = mock(Progress.class);
+    private final Progress.Factory progressFactory = mock(Progress.Factory.class);
 
-    private LocalDate date = LocalDate.now();
-    private ZoneId timeZone = ZoneId.systemDefault();
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final ZoneId timeZone = ZoneId.systemDefault();
     private EwbDataFilePaths paths;
     private EwbEnergyProfileStoreReindexer reindexer;
 
     @BeforeEach
-    public void before(@TempDir Path tempDir) throws Exception {
+    public void before(@TempDir Path tempDir) {
         doReturn(progress).when(progressFactory).create(any(), anyInt());
 
         paths = new EwbDataFilePaths(tempDir.toString());
@@ -75,16 +75,17 @@ public class EwbEnergyProfileStoreReindexerTest {
         reindexer.reindex();
 
         assertThat(Files.exists(paths.energyReadingsIndex()), is(true));
-        SqliteBlobStore blobIndex = new SqliteBlobStore(paths.energyReadingsIndex(), Collections.singleton(BlobDateRangeIndex.STORE_TAG));
-        BlobDateRangeIndex index = new BlobDateRangeIndex(blobIndex);
+        try (SqliteBlobStore blobIndex = new SqliteBlobStore(paths.energyReadingsIndex(), Collections.singleton(BlobDateRangeIndex.STORE_TAG))) {
+            BlobDateRangeIndex index = new BlobDateRangeIndex(blobIndex);
 
-        IdDateRange range = index.get("allDays");
-        IdDateRange expectedRange = new IdDateRange("allDays", date.minusDays(1), date.plusDays(1));
-        assertThat(range, equalTo(expectedRange));
+            IdDateRange range = index.get("allDays");
+            IdDateRange expectedRange = new IdDateRange("allDays", date.minusDays(1), date.plusDays(1));
+            assertThat(range, equalTo(expectedRange));
 
-        range = index.get("singleDay");
-        expectedRange = new IdDateRange("singleDay", date, date);
-        assertThat(range, equalTo(expectedRange));
+            range = index.get("singleDay");
+            expectedRange = new IdDateRange("singleDay", date, date);
+            assertThat(range, equalTo(expectedRange));
+        }
     }
 
     @Test

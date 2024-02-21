@@ -19,7 +19,6 @@ import com.zepben.blobstore.itemwrappers.ByDateBlobWriterProvider;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,19 +42,20 @@ class ByDateBlobStoreCache implements ByDateBlobWriterProvider, ByDateBlobReader
         this.factory = factory;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public BlobWriter getWriter(LocalDate date, ZoneId timeZone) throws BlobStoreException {
         BlobStore store = getStore(date, timeZone, true);
         if (store == null)
             throw new IllegalStateException("blobstore should never be null for writing");
-        return store.writer();
+        return store.getWriter();
     }
 
     @Override
     @Nullable
     public BlobReader getReader(LocalDate date, ZoneId timeZone) throws BlobStoreException {
         BlobStore store = getStore(date, timeZone, false);
-        return store == null ? null : store.reader();
+        return store == null ? null : store.getReader();
     }
 
     @Nullable

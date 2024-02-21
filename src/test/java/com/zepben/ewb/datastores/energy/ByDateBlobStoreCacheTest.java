@@ -24,8 +24,8 @@ import static org.mockito.Mockito.*;
 
 public class ByDateBlobStoreCacheTest {
 
-    private LocalDate date = LocalDate.now();
-    private ZoneId timeZone = ZoneId.systemDefault();
+    private final LocalDate date = LocalDate.now(ZoneId.systemDefault());
+    private final ZoneId timeZone = ZoneId.systemDefault();
 
     @Test
     public void doesCache() throws Exception {
