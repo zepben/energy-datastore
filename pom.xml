@@ -54,6 +54,19 @@
         <url>https://github.com/zepben/energy-datastore</url>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>zepben-maven</id>
+            <name>Zepben Releases</name>
+            <url>${releases.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>zepben-maven</id>
+            <name>Zepben Snapshots</name>
+            <url>${snapshots.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
