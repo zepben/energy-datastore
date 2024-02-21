@@ -6,6 +6,6 @@ on:
 
 jobs:
   run:
-    uses: zepben/.github/.github/workflows/maven-build-oss.yml@main
+    uses: zepben/.github/.github/workflows/maven-build.yml@main
     secrets: inherit
 
