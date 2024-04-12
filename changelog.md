@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 * Updated the super pom with potentially breaking transitive dependencies.
+* `EwbDataFilePaths` is now imported from the `evolve-sdk` rather than `ewb-data-file-paths`.
 
 ### New Features
 * None.
