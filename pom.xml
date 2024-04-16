@@ -89,7 +89,7 @@
         <dependency>
             <groupId>com.zepben</groupId>
             <artifactId>evolve-sdk</artifactId>
-            <version>0.18.0-SNAPSHOT11</version>
+            <version>0.20.0-SNAPSHOT2</version>
         </dependency>
 
         <dependency>

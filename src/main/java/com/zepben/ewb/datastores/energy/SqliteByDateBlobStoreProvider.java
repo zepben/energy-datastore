@@ -38,7 +38,7 @@ class SqliteByDateBlobStoreProvider implements ByDateBlobStoreProvider {
         SqliteBlobStore blobStore = null;
         boolean needsClosing = true;
         try {
-            Path path = ewbPaths.energyReadings(date);
+            Path path = ewbPaths.energyReading(date);
             if (!Files.exists(path) && !createIfNotExists)
                 return null;
 
