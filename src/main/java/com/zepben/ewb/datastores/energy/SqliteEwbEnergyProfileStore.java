@@ -24,7 +24,7 @@ import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
 import com.zepben.energy.datastore.blobstore.indexing.CachedDateRangeIndex;
 import com.zepben.energy.datastore.blobstore.indexing.DateRangeIndex;
 import com.zepben.energy.model.EnergyProfile;
-import com.zepben.ewb.filepaths.EwbDataFilePaths;
+import com.zepben.evolve.database.paths.EwbDataFilePaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -14,7 +14,7 @@ import com.zepben.energy.datastore.ErrorHandler;
 import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
 import com.zepben.energy.model.EnergyProfile;
 import com.zepben.energy.model.IdDateRange;
-import com.zepben.ewb.filepaths.EwbDataFilePaths;
+import com.zepben.evolve.database.paths.EwbDataFilePaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
