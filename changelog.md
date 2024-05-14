@@ -1,6 +1,6 @@
 # Energy Datastore changelog
 
-## [1.4.0] - UNRELEASED
+## [1.4.0] - 2024-05-14
 
 ### Breaking Changes
 * Updated the super pom with potentially breaking transitive dependencies.
