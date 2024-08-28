@@ -13,6 +13,7 @@ import com.zepben.blobstore.BlobReader;
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.itemwrappers.ByDateBlobReaderProvider;
 import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
+import com.zepben.evolve.database.paths.DatabaseType;
 import com.zepben.evolve.database.paths.EwbDataFilePaths;
 import kotlin.Unit;
 
@@ -22,15 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("WeakerAccess")
 @EverythingIsNonnullByDefault
@@ -100,7 +96,7 @@ public class EwbEnergyProfileStoreReindexer {
 
     private void writeIndex(Map<String, Range> index) throws BlobStoreException {
         Progress progress = progressFactory.create("Saving index", index.size());
-        Path backupPath = Paths.get(ewbPaths.energyReadingsIndex() + ".bak");
+        Path backupPath = Paths.get(ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX) + ".bak");
         backupIndex(backupPath);
 
         boolean status = true;
@@ -123,29 +119,16 @@ public class EwbEnergyProfileStoreReindexer {
 
     private List<LocalDate> getAvailableDates() throws BlobStoreException {
         try {
-            try (Stream<Path> files = Files.walk(ewbPaths.getBaseDir(), 1)) {
-                return files
-                    .map(file -> {
-                        try {
-                            String dateStr = file.getFileName().toString();
-                            return LocalDate.parse(dateStr);
-                        } catch (DateTimeParseException ex) {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .sorted()
-                    .collect(toList());
-            }
-        } catch (IOException ex) {
-            throw new BlobStoreException("Failed to read directory listing from disk", ex);
+            return ewbPaths.getAvailableDatesFor(DatabaseType.ENERGY_READING);
+        } catch (Exception ex) {
+            throw new BlobStoreException("Failed to read date listing from " + ewbPaths.getClass().getSimpleName(), ex);
         }
     }
 
     private void backupIndex(Path backupPath) throws BlobStoreException {
         try {
-            if (Files.exists(ewbPaths.energyReadingsIndex()))
-                Files.move(ewbPaths.energyReadingsIndex(), backupPath);
+            if (Files.exists(ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX)))
+                Files.move(ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX), backupPath);
         } catch (IOException e) {
             throw new BlobStoreException("Failed to backup index file", e);
         }
@@ -161,9 +144,9 @@ public class EwbEnergyProfileStoreReindexer {
 
     private void restoreIndex(Path backupPath) throws BlobStoreException {
         try {
-            Files.deleteIfExists(ewbPaths.energyReadingsIndex());
+            Files.deleteIfExists(ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX));
             if (Files.exists(backupPath))
-                Files.move(backupPath, ewbPaths.energyReadingsIndex());
+                Files.move(backupPath, ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX));
         } catch (IOException ex) {
             throw new BlobStoreException(
                 "Failed to restore index. You need to manually restore from backup file: " + backupPath,

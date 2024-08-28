@@ -14,7 +14,9 @@ import com.zepben.energy.datastore.ErrorHandler;
 import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
 import com.zepben.energy.model.EnergyProfile;
 import com.zepben.energy.model.IdDateRange;
+import com.zepben.evolve.database.paths.DatabaseType;
 import com.zepben.evolve.database.paths.EwbDataFilePaths;
+import com.zepben.evolve.database.paths.LocalEwbDataFilePaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,7 +50,7 @@ public class EwbEnergyProfileStoreReindexerTest {
     public void before(@TempDir Path tempDir) {
         doReturn(progress).when(progressFactory).create(any(), anyInt());
 
-        paths = new EwbDataFilePaths(tempDir.toString());
+        paths = new LocalEwbDataFilePaths(tempDir.toString());
 
         createReadingsFiles();
         reindexer = EwbEnergyProfileStoreReindexer.create(paths, timeZone, progressFactory);
@@ -74,8 +76,8 @@ public class EwbEnergyProfileStoreReindexerTest {
     public void reindexes() throws Exception {
         reindexer.reindex();
 
-        assertThat(Files.exists(paths.energyReadingsIndex()), is(true));
-        try (SqliteBlobStore blobIndex = new SqliteBlobStore(paths.energyReadingsIndex(), Collections.singleton(BlobDateRangeIndex.STORE_TAG))) {
+        assertThat(Files.exists(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX)), is(true));
+        try (SqliteBlobStore blobIndex = new SqliteBlobStore(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX), Collections.singleton(BlobDateRangeIndex.STORE_TAG))) {
             BlobDateRangeIndex index = new BlobDateRangeIndex(blobIndex);
 
             IdDateRange range = index.get("allDays");
@@ -90,15 +92,15 @@ public class EwbEnergyProfileStoreReindexerTest {
 
     @Test
     public void reindexesMissingIndexFileDoesNotCauseFailure() throws Exception {
-        Files.delete(paths.energyReadingsIndex());
+        Files.delete(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX));
         reindexer.reindex();
     }
 
     @Test
     public void restoresIfCanNotWrite() throws Exception {
         // Blow away the index that is there and create a rubbish file that we can test gets restored
-        Files.delete(paths.energyReadingsIndex());
-        Files.write(paths.energyReadingsIndex(), Arrays.asList("something", "to test"));
+        Files.delete(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX));
+        Files.write(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX), Arrays.asList("something", "to test"));
 
         BlobDateRangeIndex index = mock(BlobDateRangeIndex.class);
         doReturn(false).when(index).commit();
@@ -110,7 +112,7 @@ public class EwbEnergyProfileStoreReindexerTest {
             progressFactory);
 
         expect(() -> reindexer.reindex()).toThrow(BlobStoreException.class).withMessage("Failed to write to index database.");
-        assertThat(Files.readAllLines(paths.energyReadingsIndex()), equalTo(Arrays.asList("something", "to test")));
+        assertThat(Files.readAllLines(paths.resolve(DatabaseType.ENERGY_READINGS_INDEX)), equalTo(Arrays.asList("something", "to test")));
     }
 
     @Test
