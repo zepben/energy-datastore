@@ -10,7 +10,7 @@
 
     <groupId>com.zepben.ewb</groupId>
     <artifactId>ewb-energy-datastore</artifactId>
-    <version>1.5.0-SNAPSHOT1</version>
+    <version>1.5.0-SNAPSHOT2</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Datastore for energy readings</description>
