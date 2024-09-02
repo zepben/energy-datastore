@@ -24,6 +24,7 @@ import com.zepben.energy.datastore.blobstore.indexing.BlobDateRangeIndex;
 import com.zepben.energy.datastore.blobstore.indexing.CachedDateRangeIndex;
 import com.zepben.energy.datastore.blobstore.indexing.DateRangeIndex;
 import com.zepben.energy.model.EnergyProfile;
+import com.zepben.evolve.database.paths.DatabaseType;
 import com.zepben.evolve.database.paths.EwbDataFilePaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class SqliteEwbEnergyProfileStore implements EnergyProfileStore {
 
     private final Logger log = LoggerFactory.getLogger(SqliteEwbEnergyProfileStore.class);
 
-    private BlobDateRangeIndex dateRangeIndex;
+    private final BlobDateRangeIndex dateRangeIndex;
     private final ByDateBlobStoreCache storeProvider;
     private final Serialisers serialisers;
     private final Deserialisers deserialisers;
@@ -79,7 +80,7 @@ public class SqliteEwbEnergyProfileStore implements EnergyProfileStore {
     }
 
     static BlobDateRangeIndex createEnergyProfileIndex(EwbDataFilePaths ewbPaths) {
-        SqliteBlobStore dateRangeIndexStore = new SqliteBlobStore(ewbPaths.energyReadingsIndex(), Collections.singleton(BlobDateRangeIndex.STORE_TAG));
+        SqliteBlobStore dateRangeIndexStore = new SqliteBlobStore(ewbPaths.resolve(DatabaseType.ENERGY_READINGS_INDEX), Collections.singleton(BlobDateRangeIndex.STORE_TAG));
         return new BlobDateRangeIndex(dateRangeIndexStore);
     }
 
@@ -100,7 +101,7 @@ public class SqliteEwbEnergyProfileStore implements EnergyProfileStore {
 
     @Override
     public void close() {
-        storeProvider.close((store, date, error) -> log.error("Failed to close sqlite energy profile store for " + date.toString(), error));
+        storeProvider.close((store, date, error) -> log.error("Failed to close sqlite energy profile store for " + date, error));
 
         try {
             dateRangeIndex.close();

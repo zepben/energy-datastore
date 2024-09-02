@@ -15,7 +15,9 @@ import com.zepben.energy.model.Channel;
 import com.zepben.energy.model.EnergyProfile;
 import com.zepben.energy.model.IdDateRange;
 import com.zepben.energy.model.Readings;
+import com.zepben.evolve.database.paths.DatabaseType;
 import com.zepben.evolve.database.paths.EwbDataFilePaths;
+import com.zepben.evolve.database.paths.LocalEwbDataFilePaths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +52,7 @@ public class SqliteEwbEnergyProfileStoreTest {
 
     @BeforeEach
     public void before(@TempDir Path tempDir) {
-        paths = new EwbDataFilePaths(tempDir);
+        paths = new LocalEwbDataFilePaths(tempDir);
         store = new SqliteEwbEnergyProfileStore(paths, timeZone, EwbChannelFactory.DOUBLE_VALUES);
     }
 
@@ -69,7 +71,7 @@ public class SqliteEwbEnergyProfileStoreTest {
         store.writer().write(profile, onError);
         store.writer().commit(onError);
         verify(onError, never()).handle(any(), any(), any(), any());
-        assertTrue(Files.exists(paths.energyReading(LocalDate.now(ZoneId.systemDefault()))));
+        assertTrue(Files.exists(paths.resolve(DatabaseType.ENERGY_READING, LocalDate.now(ZoneId.systemDefault()))));
 
         EnergyProfile getProfile = store.reader().get("id", date, mock(ErrorHandler.class));
         verify(onError, never()).handle(any(), any(), any(), any());
@@ -127,7 +129,7 @@ public class SqliteEwbEnergyProfileStoreTest {
         ErrorHandler onError = mock(ErrorHandler.class);
         store.writer().write(profile, onError);
 
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:file:" + paths.energyReading(date))) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:file:" + paths.resolve(DatabaseType.ENERGY_READING, date))) {
             try (Statement stmt = connection.createStatement()) {
                 String sqlFormat = "select value from metadata where key = '%s'";
                 try (ResultSet rs = stmt.executeQuery(String.format(sqlFormat, METADATA_DATE_ID))) {

@@ -12,6 +12,7 @@ import com.zepben.annotations.EverythingIsNonnullByDefault;
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.sqlite.SqliteBlobStore;
 import com.zepben.energy.datastore.blobstore.EnergyProfileAttribute;
+import com.zepben.evolve.database.paths.DatabaseType;
 import com.zepben.evolve.database.paths.EwbDataFilePaths;
 
 import javax.annotation.Nullable;
@@ -38,7 +39,7 @@ class SqliteByDateBlobStoreProvider implements ByDateBlobStoreProvider {
         SqliteBlobStore blobStore = null;
         boolean needsClosing = true;
         try {
-            Path path = ewbPaths.energyReading(date);
+            Path path = ewbPaths.resolve(DatabaseType.ENERGY_READING, date);
             if (!Files.exists(path) && !createIfNotExists)
                 return null;
 

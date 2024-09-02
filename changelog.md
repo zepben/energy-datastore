@@ -7,7 +7,7 @@
 * None.
 
 ### Enhancements
-* None.
+* Use the updated SDK interface for resolving database file paths.
 
 ### Fixes
 * None.
