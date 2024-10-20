@@ -10,7 +10,7 @@
 
     <groupId>com.zepben.ewb</groupId>
     <artifactId>ewb-energy-datastore</artifactId>
-    <version>1.5.0-SNAPSHOT2</version>
+    <version>1.5.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Datastore for energy readings</description>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>com.zepben</groupId>
             <artifactId>evolve-sdk</artifactId>
-            <version>0.23.0-SNAPSHOT8</version>
+            <version>0.23.0</version>
         </dependency>
 
         <dependency>

@@ -1,5 +1,5 @@
 # Energy Datastore changelog
-## [1.5.0] - UNRELEASED
+## [1.5.0] - 2024-10-21
 ### Breaking Changes
 * None.
 
