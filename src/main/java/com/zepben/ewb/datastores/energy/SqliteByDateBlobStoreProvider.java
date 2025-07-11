@@ -12,8 +12,8 @@ import com.zepben.annotations.EverythingIsNonnullByDefault;
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.sqlite.SqliteBlobStore;
 import com.zepben.energy.datastore.blobstore.EnergyProfileAttribute;
-import com.zepben.evolve.database.paths.DatabaseType;
-import com.zepben.evolve.database.paths.EwbDataFilePaths;
+import com.zepben.ewb.database.paths.DatabaseType;
+import com.zepben.ewb.database.paths.EwbDataFilePaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

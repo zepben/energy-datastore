@@ -1,7 +1,7 @@
 # Energy Datastore changelog
-## [1.6.0] - UNRELEASED
+## [2.0.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Pulls in transitive dependency for the EWB SDK v1.0.0 with major breaking changes.
 
 ### New Features
 * None.

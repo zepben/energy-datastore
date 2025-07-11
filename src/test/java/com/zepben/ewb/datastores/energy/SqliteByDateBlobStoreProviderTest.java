@@ -10,8 +10,8 @@ package com.zepben.ewb.datastores.energy;
 
 import com.zepben.blobstore.BlobStoreException;
 import com.zepben.blobstore.sqlite.SqliteBlobStore;
-import com.zepben.evolve.database.paths.EwbDataFilePaths;
-import com.zepben.evolve.database.paths.LocalEwbDataFilePaths;
+import com.zepben.ewb.database.paths.EwbDataFilePaths;
+import com.zepben.ewb.database.paths.LocalEwbDataFilePaths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
